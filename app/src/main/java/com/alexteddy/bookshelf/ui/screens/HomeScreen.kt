@@ -5,20 +5,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,11 +32,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.alexteddy.bookshelf.R
 import com.alexteddy.bookshelf.network.Book
+import com.alexteddy.bookshelf.ui.theme.BookshelfTheme
 
 @Composable
 fun HomeScreen(
@@ -42,21 +50,8 @@ fun HomeScreen(
     when (booksUiState) {
         is BooksUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
         is BooksUiState.Success ->
-//            ResultScreen(
-//                booksUiState.searchResult.items[0].volumeInfo.imageLinks.thumbnail,
-//                modifier.padding(top = contentPadding.calculateTopPadding())
-//            )
-//            ResultScreen(
-//                booksUiState.searchResult.items[0].volumeInfo.imageLinks.thumbnail,
-//                modifier.padding(top = contentPadding.calculateTopPadding())
-//            )
         //ResultScreen(booksUiState.searchResult.items.size.toString(), modifier.padding(top = contentPadding.calculateTopPadding()))
-        //ResultScreen("Success:  Amphibian photos retrieved", modifier.padding(top = contentPadding.calculateTopPadding()))
-        // "Success: ${mpsUiState.amps.size} Amphibian photos retrieved" ${booksUiState}
-        // hien grid chieu doc nhieu buc anh
         PhotosGridScreen(booksUiState.searchResult.items, modifier, contentPadding)
-        // hien 1 buc anh
-        //MarsPhotoCard(photo = marsUiState.photos, modifier = modifier.fillMaxSize())
         //ThumbnailBookCard(booksUiState.searchResult.items[0], modifier = modifier.fillMaxSize())
         is BooksUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
@@ -105,7 +100,7 @@ fun ThumbnailBookCard(book: Book, modifier: Modifier = Modifier) {
             model = book.volumeInfo.imageLinks?.let{
                 ImageRequest.Builder(context = LocalContext.current)
                     .data(book.volumeInfo.imageLinks.thumbnail?.replace("http:", "https:"))
-                    .crossfade(false)
+                    .crossfade(true)
                     .build()
             },
             contentDescription = stringResource(R.string.book_image),
@@ -157,4 +152,39 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
             Text(stringResource(R.string.retry))
         }
     }
+}
+
+// Step: Search bar - Modifiers
+@Composable
+fun SearchBar(
+    modifier: Modifier = Modifier
+) {
+    // Implement composable here
+    TextField(
+        value = "",
+        onValueChange = {},
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null
+            )
+        },
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedContainerColor = MaterialTheme.colorScheme.surface
+        ),
+        placeholder = {
+            Text(stringResource(R.string.placeholder_search))
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+    )
+}
+
+
+@Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
+@Composable
+fun SearchBarPreview() {
+    BookshelfTheme { SearchBar(Modifier.padding(8.dp)) }
 }
