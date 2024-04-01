@@ -1,6 +1,5 @@
 package com.alexteddy.bookshelf.ui.screens
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,16 +37,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.alexteddy.bookshelf.R
 import com.alexteddy.bookshelf.network.Book
 import com.alexteddy.bookshelf.ui.theme.BookshelfTheme
-
-enum class CupcakeScreen(@StringRes val title: Int) {
-    Start(title = R.string.app_name),
-    Flavor(title = R.string.book_image),
-}
 
 @Composable
 fun HomeScreen(
@@ -57,7 +52,7 @@ fun HomeScreen(
     onSearchQueryChanged: (String) -> Unit,
     onKeyboardDone: () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
+    //contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     when (booksUiState) {
         is BooksUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
@@ -69,7 +64,8 @@ fun HomeScreen(
             onSearchQueryChanged = onSearchQueryChanged,
             onKeyboardDone = onKeyboardDone,
             modifier,
-            contentPadding)
+            //contentPadding
+        )
         //ThumbnailBookCard(booksUiState.searchResult.items[0], modifier = modifier.fillMaxSize())
         is BooksUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
@@ -82,15 +78,18 @@ fun PhotosGridScreen(
     onSearchQueryChanged: (String) -> Unit,
     onKeyboardDone: () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
+    //contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     Column(
         modifier = modifier
-            .padding(contentPadding),
+            .padding(0.dp),
+            //.padding(contentPadding),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     )
     {
+        val booksViewModel: BooksViewModel =
+            viewModel(factory = BooksViewModel.Factory)
         SearchBar(
             userQuery = userQuery,
             onSearchQueryChanged = onSearchQueryChanged,
