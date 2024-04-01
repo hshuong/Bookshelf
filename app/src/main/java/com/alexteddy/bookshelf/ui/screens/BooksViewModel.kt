@@ -25,15 +25,37 @@ sealed interface BooksUiState {
 class BooksViewModel(private val booksRepository: BooksRepository) : ViewModel() {
     var booksUiState: BooksUiState by mutableStateOf(BooksUiState.Loading)
         private set
+
+    var userQuery by mutableStateOf("")
+        private set
     init {
         getBooksInViewModel()
+    }
+
+    fun updateQueryString(query: String) {
+        userQuery = query
+    }
+
+    fun searchByQuery() {
+        if (userQuery.isNotEmpty()) {
+            val userQueryPlus = userQuery.replace(' ','+')
+            viewModelScope.launch {
+                booksUiState = try {
+                    BooksUiState.Success(
+                        booksRepository.searchBooks(searchQuery = userQueryPlus)
+                    )
+                } catch (e: IOException) {
+                    BooksUiState.Error
+                }
+            }
+        }
     }
 
     fun getBooksInViewModel() {
         viewModelScope.launch {
             booksUiState = try {
                 BooksUiState.Success(
-                    booksRepository.searchResult()
+                    booksRepository.searchBooks()
                 )
             } catch (e: IOException) {
                 BooksUiState.Error

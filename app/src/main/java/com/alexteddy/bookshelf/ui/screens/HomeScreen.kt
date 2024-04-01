@@ -1,5 +1,6 @@
 package com.alexteddy.bookshelf.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -32,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -40,10 +44,18 @@ import com.alexteddy.bookshelf.R
 import com.alexteddy.bookshelf.network.Book
 import com.alexteddy.bookshelf.ui.theme.BookshelfTheme
 
+enum class CupcakeScreen(@StringRes val title: Int) {
+    Start(title = R.string.app_name),
+    Flavor(title = R.string.book_image),
+}
+
 @Composable
 fun HomeScreen(
     booksUiState: BooksUiState,
     retryAction: () -> Unit,
+    userQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
+    onKeyboardDone: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -51,7 +63,13 @@ fun HomeScreen(
         is BooksUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
         is BooksUiState.Success ->
         //ResultScreen(booksUiState.searchResult.items.size.toString(), modifier.padding(top = contentPadding.calculateTopPadding()))
-        PhotosGridScreen(booksUiState.searchResult.items, modifier, contentPadding)
+        PhotosGridScreen(
+            booksUiState.searchResult.items,
+            userQuery = userQuery,
+            onSearchQueryChanged = onSearchQueryChanged,
+            onKeyboardDone = onKeyboardDone,
+            modifier,
+            contentPadding)
         //ThumbnailBookCard(booksUiState.searchResult.items[0], modifier = modifier.fillMaxSize())
         is BooksUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
@@ -60,24 +78,40 @@ fun HomeScreen(
 @Composable
 fun PhotosGridScreen(
     books: List<Book>,
+    userQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
+    onKeyboardDone: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(150.dp),
-        modifier = modifier.padding(horizontal = 4.dp),
-        contentPadding = contentPadding,
-    ) {
-        items(items = books, key = { book -> book.id }) {
-            book ->
-            ThumbnailBookCard(
-                book,
-                modifier = modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
+    Column(
+        modifier = modifier
+            .padding(contentPadding),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    )
+    {
+        SearchBar(
+            userQuery = userQuery,
+            onSearchQueryChanged = onSearchQueryChanged,
+            onKeyboardDone = onKeyboardDone
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(150.dp),
+            modifier = modifier.padding(horizontal = 4.dp),
+            //contentPadding = contentPadding,
+        ) {
+            items(items = books, key = { book -> book.id }) {
+                    book ->
+                ThumbnailBookCard(
+                    book,
+                    modifier = modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
                     //.aspectRatio(0.8f)
                     // the desired width/height positive ratio
-            )
+                )
+            }
         }
     }
 }
@@ -157,12 +191,22 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 // Step: Search bar - Modifiers
 @Composable
 fun SearchBar(
+    userQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
+    onKeyboardDone: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Implement composable here
     TextField(
-        value = "",
-        onValueChange = {},
+        value = userQuery,
+        singleLine = true,
+        onValueChange = onSearchQueryChanged,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { onKeyboardDone() }
+        ),
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -186,5 +230,5 @@ fun SearchBar(
 @Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
 @Composable
 fun SearchBarPreview() {
-    BookshelfTheme { SearchBar(Modifier.padding(8.dp)) }
+    BookshelfTheme { SearchBar("",{},{},Modifier.padding(8.dp)) }
 }

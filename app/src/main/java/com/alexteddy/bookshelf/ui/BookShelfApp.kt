@@ -36,20 +36,15 @@ fun BookshelfApp() {
         ) {
             val booksViewModel: BooksViewModel =
                 viewModel(factory = BooksViewModel.Factory)
-            Column(
-                modifier = Modifier
-                    .padding(it),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                SearchBar()
-                HomeScreen(
-                    booksUiState = booksViewModel.booksUiState,
-                    retryAction = booksViewModel::getBooksInViewModel,
-                    modifier = Modifier.fillMaxSize(),
-                    //contentPadding = it,
-                )
-            }
-
+            HomeScreen(
+                booksUiState = booksViewModel.booksUiState,
+                retryAction = booksViewModel::getBooksInViewModel,
+                userQuery = booksViewModel.userQuery,
+                onSearchQueryChanged = {booksViewModel.updateQueryString(it)},
+                onKeyboardDone = {booksViewModel.searchByQuery()},
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = it,
+            )
         }
     }
 }
