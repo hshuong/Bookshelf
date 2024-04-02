@@ -44,17 +44,18 @@ fun BookshelfApp(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { BookshelfTopAppBar(scrollBehavior = scrollBehavior) }
     ) {
+        innerPadding ->
         NavHost(
             navController = navController, // de navigate qua lai giua cac screen
             startDestination = BookScreen.BookList.name,
-            modifier = Modifier.padding(it) // it PaddingValues from Scaffold
+            modifier = Modifier.padding(innerPadding) // it PaddingValues from Scaffold
         ) {
                 composable(BookScreen.BookList.name) {
                     HomeScreen(
                         booksUiState = booksViewModel.booksUiState,
                         retryAction = booksViewModel::getBooksInViewModel,
                         userQuery = booksViewModel.userQuery,
-                        onSearchQueryChanged = {booksViewModel.updateQueryString(it)},
+                        onSearchQueryChanged = { input -> booksViewModel.updateQueryString(input) },
                         onKeyboardDone = {booksViewModel.searchByQuery()},
                         modifier = Modifier.fillMaxSize(),
                         //contentPadding = it,
